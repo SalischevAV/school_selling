@@ -8,6 +8,6 @@ import { getJWTConfig } from '../configs/jwt.config';
 @Module({
   controllers: [AuthController],
   providers: [AuthService],
-  imports: [UserModule, JwtModule.register(getJWTConfig())],
+  imports: [UserModule, JwtModule.registerAsync(getJWTConfig())],
 })
 export class AuthModule {}
