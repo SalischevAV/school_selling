@@ -1,5 +1,6 @@
+import { ConfigService } from '@nestjs/config';
 import { UserRepository } from './../user/repositories/user.repository';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserRole } from '@purple-miroservices/interfaces';
 import { User } from '../user/models/user.model';
@@ -8,9 +9,10 @@ import { AccountRegister } from '@purple-miroservices/contracts';
 
 @Injectable()
 export class AuthService {
+    protected logger = new Logger(AuthService.name);
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
     ) { }
 
     async register(registerUserDto: AccountRegister.Request) {
@@ -50,8 +52,12 @@ export class AuthService {
       }
 
     async login(id: string) {
-        return {
-            access_token: await this.jwtService.signAsync({id})
+        try{
+            return {
+                access_token: await this.jwtService.signAsync({id})
+            }
+        } catch(error){
+            this.logger.error((error as unknown as Error).message);
         }
     }
 }
