@@ -1,10 +1,10 @@
 import { UserRepository } from './../user/repositories/user.repository';
-import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
-import { RegisterUserDto } from './auth.controller';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserRole } from '@purple-miroservices/interfaces';
 import { User } from '../user/models/user.model';
 import { JwtService } from '@nestjs/jwt';
+import { AccountRegister } from '@purple-miroservices/contracts';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +13,7 @@ export class AuthService {
         private readonly jwtService: JwtService
     ) { }
 
-    async register(registerUserDto: RegisterUserDto) {
+    async register(registerUserDto: AccountRegister.Request) {
         await this.validateRegisterUserDto(registerUserDto);
 
         const newUserEntity = await new UserEntity({
@@ -26,7 +26,7 @@ export class AuthService {
         return {email: newUser.email};
     }
 
-    private async validateRegisterUserDto(registerUserDto: RegisterUserDto) {
+    private async validateRegisterUserDto(registerUserDto: AccountRegister.Request) {
         try {
             await this.userRepository.findOne({
                 email: registerUserDto.email,

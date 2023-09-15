@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@purple-miroservices/contracts": ["libs/contracts/src/index.ts"],
       "@purple-miroservices/database": ["libs/database/src/index.ts"],
       "@purple-miroservices/interfaces": ["libs/interfaces/src/index.ts"]
     }

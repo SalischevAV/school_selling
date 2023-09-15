@@ -1,28 +1,21 @@
 import { AuthService } from './auth.service';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller } from '@nestjs/common';
+import { AccountLogin, AccountRegister } from '@purple-miroservices/contracts';
+import { RMQRoute, RMQValidate } from 'nestjs-rmq';
 
-export class RegisterUserDto {
-    email: string;
-    password: string;
-    displayName?: string;
-}
-
-export class LoginUserDto {
-    email: string;
-    password: string;
-}
-
-@Controller('auth')
+@Controller()
 export class AuthController {
     constructor(private readonly authService: AuthService){}
 
-    @Post('register')
-    async register(@Body() registerUserDto: RegisterUserDto){
+    @RMQRoute(AccountRegister.topic)
+    @RMQValidate()
+    async register(@Body() registerUserDto:  AccountRegister.Request): Promise<AccountRegister.Response>{
         return this.authService.register(registerUserDto)
     }
 
-    @Post('login')
-    async login(@Body() {email, password}: LoginUserDto){
+    @RMQRoute(AccountLogin.topic)
+    @RMQValidate()
+    async login(@Body() {email, password}: AccountLogin.Request): Promise<AccountLogin.Response>{
         const {_id} = await this.authService.verifyUser(email, password);
         return this.authService.login(_id);
     }
