@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IUser, UserRole } from '@purple-miroservices/interfaces';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { UserCourse, UserCourseSchema } from './user-course.model';
 
 @Schema()
 export class User extends Document implements IUser {
@@ -15,6 +16,9 @@ export class User extends Document implements IUser {
 
     @Prop({required: true, enum: UserRole, type: String, default: UserRole.Student})
     role: UserRole;
+
+    @Prop({ type: [UserCourseSchema], _id: false})
+    courses: Types.Array<UserCourse>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

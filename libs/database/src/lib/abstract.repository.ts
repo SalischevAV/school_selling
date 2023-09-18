@@ -29,6 +29,19 @@ export abstract class AbstractRepository<TDocument extends Document> {
     return document as unknown as TDocument;
   }
 
+  async findById(
+    id: string,
+  ): Promise<TDocument | undefined> {
+    const document = await this.model.findById(id, {}, { lean: true }).exec();
+
+    if (!document) {
+      this.logger.warn('Document not found with id', id);
+      throw new NotFoundException('Document not found.');
+    }
+
+    return document as unknown as TDocument;
+  }
+
   async findOneAndUpdate(
     filterQuery: FilterQuery<TDocument>,
     update: UpdateQuery<TDocument>,
@@ -62,7 +75,7 @@ export abstract class AbstractRepository<TDocument extends Document> {
     }) as unknown as TDocument;
   }
 
-//   async createIndex(options: CreateIndexesOptions) {
-//     return this.model.createIndexes(options as any);
-//   }
+  async createIndex(options: CreateIndexesOptions) {
+    return this.model.createIndexes(options as any);
+  }
 }
