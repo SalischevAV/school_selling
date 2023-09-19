@@ -12,7 +12,15 @@ export class AuthController {
     @UsePipes(new ValidationPipe())
     async register(@Body() loginUserDto: RegisterDto) {
         try {
-            return await this.rmqService.send<AccountRegister.Request, AccountRegister.Response>(AccountRegister.topic, loginUserDto)
+            return await this.rmqService.send<AccountRegister.Request, AccountRegister.Response>(
+                AccountRegister.topic,
+                loginUserDto,
+                {
+                    headers: {
+                        requestId: 'qwe', //TODO implement autogenerate, implement wrapper
+                    }
+                }
+            )
         } catch (error) {
             if (error instanceof Error){
                 throw new UnauthorizedException(error.message);

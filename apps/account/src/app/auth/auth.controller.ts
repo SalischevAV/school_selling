@@ -1,7 +1,7 @@
 import { AuthService } from './auth.service';
-import { Body, Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { AccountLogin, AccountRegister } from '@purple-miroservices/contracts';
-import { RMQRoute, RMQValidate } from 'nestjs-rmq';
+import { Message, RMQMessage, RMQRoute, RMQValidate } from 'nestjs-rmq';
 
 @Controller()
 export class AuthController {
@@ -9,13 +9,20 @@ export class AuthController {
 
     @RMQRoute(AccountRegister.topic)
     @RMQValidate()
-    async register(@Body() registerUserDto:  AccountRegister.Request): Promise<AccountRegister.Response>{
-        return this.authService.register(registerUserDto)
+    async register(registerUserDto:  AccountRegister.Request, @RMQMessage msg: Message): Promise<AccountRegister.Response>{
+        const requestId = msg.properties.headers['requestId'];
+        const logger = new Logger(requestId) //TODO implement decorator to get id and create logger
+        try {
+            return this.authService.register(registerUserDto);
+        } catch (error) {
+            logger.error(error);
+        }
+        
     }
 
     @RMQRoute(AccountLogin.topic)
     @RMQValidate()
-    async login(@Body() {email, password}: AccountLogin.Request): Promise<AccountLogin.Response>{
+    async login({email, password}: AccountLogin.Request): Promise<AccountLogin.Response>{
         const {_id} = await this.authService.verifyUser(email, password);
         return this.authService.login(_id);
     }
