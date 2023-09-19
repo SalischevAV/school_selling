@@ -1,4 +1,4 @@
-import { IUser, IUserCourse, UserRole } from '@purple-miroservices/interfaces';
+import { IUser } from '@purple-miroservices/interfaces';
 import { IsString } from 'class-validator';
 
 export namespace AccountChangeProfile {

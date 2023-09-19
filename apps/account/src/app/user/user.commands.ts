@@ -1,47 +1,29 @@
+import { UserService } from './user.service';
 import { Body, Controller } from '@nestjs/common';
 import { AccountBuyCourse, AccountChangeProfile, AccountCheckPayment } from '@purple-miroservices/contracts';
-import { RMQRoute, RMQValidate, RMQService } from 'nestjs-rmq';
-import { UserRepository } from './repositories/user.repository';
-import { UserEntity } from './entities/user.entity';
-import { BuyCourseSaga } from './sagas/buy-course.saga';
+import { RMQRoute, RMQValidate } from 'nestjs-rmq';
 
 @Controller()
 export class UserCommands {
 
-    constructor(
-            private readonly userRepository: UserRepository,
-            private readonly rMQService: RMQService,
-        ){}
+    constructor(private readonly userService: UserService){}
 
     @RMQRoute(AccountChangeProfile.topic)
     @RMQValidate()
-    async userInfo(@Body() {id, user} :  AccountChangeProfile.Request): Promise<AccountChangeProfile.Response>{
-        const userEntity = await this.userRepository.findById(id);
-        const newUserEntity = new UserEntity(userEntity).updateProfile({...user});
-        const {_id, ...rest } = newUserEntity;
-        await this.userRepository.findOneAndUpdate({_id}, rest);
+    async changeProfile(@Body() dto :  AccountChangeProfile.Request): Promise<AccountChangeProfile.Response>{
+        this.userService.changeProfile(dto);
         return;
     }
 
     @RMQRoute(AccountBuyCourse.topic)
     @RMQValidate()
-    async buyCourse(@Body() {userId, courseId} :  AccountBuyCourse.Request): Promise<AccountBuyCourse.Response>{
-        const buyer = await this.userRepository.findById(userId);
-        const userEntity = new UserEntity(buyer);
-        const saga = new BuyCourseSaga(userEntity, courseId, this.rMQService);
-        const { user, paymentLink} = await saga.getState().pay();
-        await this.userRepository.findOneAndUpdate({_id: user._id}, user);
-        return { paymentLink };
+    async buyCourse(@Body() dto :  AccountBuyCourse.Request): Promise<AccountBuyCourse.Response>{
+        return this.userService.buyCourse(dto);
     }
 
     @RMQRoute(AccountCheckPayment.topic)
     @RMQValidate()
-    async checkPayment(@Body() {userId, courseId} :  AccountCheckPayment.Request): Promise<AccountCheckPayment.Response>{
-        const buyer = await this.userRepository.findById(userId);
-        const userEntity = new UserEntity(buyer);
-        const saga = new BuyCourseSaga(userEntity, courseId, this.rMQService);
-        const { user, status } = await saga.getState().checkPayment();
-        await this.userRepository.findOneAndUpdate({_id: user._id}, user);
-        return { status };
+    async checkPayment(@Body() dto :  AccountCheckPayment.Request): Promise<AccountCheckPayment.Response>{
+       return this.userService.checkPayment(dto);
     }
 }

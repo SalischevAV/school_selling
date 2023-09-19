@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { getMongoConfig, getRMQConfig } from './configs';
 
 import { RMQModule } from 'nestjs-rmq';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [

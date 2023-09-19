@@ -1,5 +1,5 @@
-import { UnprocessableEntityException } from "@nestjs/common";
-import { IUser, IUserCourse, PurchaseState, UserRole } from "@purple-miroservices/interfaces";
+import { AccountChangedCourse } from "@purple-miroservices/contracts";
+import { IDomainEvent, IUser, IUserCourse, PurchaseState, UserRole } from "@purple-miroservices/interfaces";
 import { compare, genSalt, hash } from "bcryptjs";
 
 export class UserEntity implements IUser {
@@ -9,6 +9,7 @@ export class UserEntity implements IUser {
 	passwordHash: string;
 	role: UserRole;
 	courses?: IUserCourse[];
+	events: IDomainEvent[] = [];
 
 	constructor(user: IUser) {
 		this._id = user._id;
@@ -43,7 +44,7 @@ export class UserEntity implements IUser {
 	}
 
 	public setCourseState(courseId: string, state: PurchaseState){
-		const candidate = this.courses.find(c => c._id === courseId);
+		const candidate = this.courses.find(c => c.courseId === courseId);
 		if(!candidate){
 			this.courses.push({
 				courseId,
@@ -53,17 +54,24 @@ export class UserEntity implements IUser {
 		}
 
 		if(state === PurchaseState.Canceled){
-			this.courses.filter(c => c._id !== courseId);
+			this.courses.filter(c => c.courseId !== courseId);
 			return this;
 		}
 
 		this.courses = this.courses.map(c => {
-			if(c._id === courseId){
+			if(c.courseId === courseId){
 				c.purchaseState = state;
 				return c;
 			}
 			return c;
 		});
+		this.events.push({
+			topic: AccountChangedCourse.topic,
+			data: {
+				courseId,
+				userId: this._id, state
+			}
+		})
 		return this;
 	}
 }

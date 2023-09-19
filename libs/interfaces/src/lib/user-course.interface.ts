@@ -6,7 +6,6 @@ export enum PurchaseState {
 }
 
 export interface IUserCourse {
-    _id?: string;
     courseId: string;
     purchaseState: PurchaseState;
 }
