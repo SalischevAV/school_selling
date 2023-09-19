@@ -19,7 +19,7 @@ export class BuyCourseSagaStateWaitingForPayment extends BuyCourseSagaState {
             this.saga.setState(PurchaseState.Canceled, this.saga.courseId);
             return { user: this.saga.user, status: PaymentStatus.canceled};
         }
-        if(status !== 'success'){
+        if(status === 'inProgress'){
             return { user: this.saga.user, status: PaymentStatus.inProgress};
         }
         if(status === 'success'){

@@ -43,6 +43,10 @@ export class UserEntity implements IUser {
 		}
 	}
 
+	public getCourseState(courseId: string): PurchaseState {
+		return this.courses.find(c => c.courseId === courseId)?.purchaseState ?? PurchaseState.Started;
+	}
+
 	public setCourseState(courseId: string, state: PurchaseState){
 		const candidate = this.courses.find(c => c.courseId === courseId);
 		if(!candidate){

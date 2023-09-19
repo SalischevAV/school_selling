@@ -7,6 +7,7 @@ export namespace AccountUserInfo {
 	export class Request {
 		@IsString()
 		id: string;
+
 	}
 
 	export class Response {
